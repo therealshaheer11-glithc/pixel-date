@@ -1,292 +1,246 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel Date Invite</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Date Invite</title>
 
-  <!-- Pixel-ish font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-  <style>
-    :root{
-      --ink:#3a1640;
-      --card:#fff6fb;
-      --shadow:#c45a8c;
-      --petal:#ffb7d5;
-    }
+<style>
+:root{
+  --ink:#3a1640;
+  --card:#fff6fb;
+  --shadow:#c45a8c;
+  --petal:#ffb7d5;
+}
 
-    * { box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
-    body{
-      margin:0;
-      min-height:100svh;
-      display:grid;
-      place-items:center;
-      background:
-        linear-gradient(135deg, #ffe6f1, #ffd6eb 40%, #ffb7d5);
-      color: var(--ink);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow:hidden;
-      image-rendering: pixelated;
-    }
+body{
+  margin:0;
+  min-height:100svh;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#ffe6f1,#ffd6eb 40%,#ffb7d5);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  overflow:hidden;
+  image-rendering:pixelated;
+}
 
-    /* pixel grid overlay */
-    .pix{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.25;
-      background-image:
-        linear-gradient(transparent 95%, rgba(58,22,64,.25) 95%),
-        linear-gradient(90deg, transparent 95%, rgba(58,22,64,.25) 95%);
-      background-size: 18px 18px;
-      mix-blend-mode: multiply;
-    }
+/* floating background icons */
+.bg{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+.bg span{
+  position:absolute;
+  font-size:22px;
+  opacity:.25;
+  animation: drift linear infinite;
+}
+@keyframes drift{
+  from{ transform:translateY(110vh); }
+  to{ transform:translateY(-120px); }
+}
 
-    .wrap{
-      width:min(520px, 92vw);
-      padding:18px;
-      position:relative;
-      z-index:2;
-    }
+.wrap{ z-index:2; width:min(520px,92vw); padding:18px; }
 
-    .card{
-      background: var(--card);
-      border: 4px solid var(--ink);
-      box-shadow: 8px 8px 0 var(--shadow);
-      border-radius: 14px;
-      padding: 22px 18px 18px;
-      position:relative;
-      animation: float 4s ease-in-out infinite;
-    }
+.card{
+  background:var(--card);
+  border:4px solid var(--ink);
+  box-shadow:8px 8px 0 var(--shadow);
+  border-radius:14px;
+  padding:22px 18px;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-6px); }
+}
 
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
+.badge{
+  position:absolute;
+  top:-14px;
+  left:14px;
+  background:#ff78b5;
+  color:#fff;
+  border:3px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow);
+  padding:8px 10px;
+  border-radius:10px;
+  font-family:"Press Start 2P";
+  font-size:10px;
+}
 
-    @media (prefers-reduced-motion: reduce) {
-      .card { animation: none; }
-    }
+h1{
+  font-family:"Press Start 2P";
+  font-size:14px;
+  text-align:center;
+  margin:10px 0 6px;
+}
 
-    .badge{
-      position:absolute;
-      top:-14px;
-      left:14px;
-      background:#ff78b5;
-      color:#fff;
-      border: 3px solid var(--ink);
-      box-shadow: 4px 4px 0 var(--shadow);
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 10px;
-      letter-spacing:.3px;
-      text-transform: uppercase;
-    }
+.sub{
+  text-align:center;
+  margin-bottom:12px;
+}
 
-    h1{
-      margin: 10px 0 6px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 14px;
-      line-height: 1.6;
-      text-align:center;
-    }
+.msg{
+  background:#fff;
+  border:3px dashed rgba(58,22,64,.6);
+  border-radius:12px;
+  padding:12px;
+  text-align:center;
+  font-size:13px;
+}
 
-    .sub{
-      text-align:center;
-      margin: 0 0 12px;
-      font-size: 14px;
-      opacity:.9;
-    }
+.btnrow{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin-top:14px;
+}
 
-    .msg{
-      margin: 10px auto 14px;
-      padding: 12px;
-      border: 3px dashed rgba(58,22,64,.6);
-      border-radius: 12px;
-      background:#fff;
-      font-size: 13px;
-      line-height: 1.45;
-      text-align:center;
-    }
+button{
+  font-family:"Press Start 2P";
+  padding:12px 14px;
+  border-radius:12px;
+  border:3px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow);
+  cursor:pointer;
+  transition:transform .15s ease;
+}
+#yes{ background:#7CFFB2; }
+#no{ background:#ffd4d4; }
 
-    .btnrow{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap: 14px;
-      margin-top: 14px;
-      flex-wrap:wrap;
-    }
+.note{
+  text-align:center;
+  font-size:12px;
+  opacity:.7;
+  margin-top:10px;
+}
 
-    button{
-      appearance:none;
-      cursor:pointer;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 12px;
-      border: 3px solid var(--ink);
-      box-shadow: 4px 4px 0 var(--shadow);
-      transition: transform .08s ease, box-shadow .08s ease;
-      user-select:none;
-      background:#fff;
-    }
-
-    button:active{
-      transform: translate(2px,2px);
-      box-shadow: 2px 2px 0 var(--shadow);
-    }
-
-    #yes{ background:#7CFFB2; }
-    #no{ background:#ffd4d4; }
-
-    .note{
-      margin-top:10px;
-      font-size:12px;
-      opacity:.75;
-      text-align:center;
-    }
-
-    .footer{
-      margin-top:14px;
-      text-align:center;
-      font-size:11px;
-      opacity:.6;
-    }
-
-    /* falling pixel petals */
-    .petal{
-      position:fixed;
-      top:-10px;
-      width:8px;
-      height:8px;
-      background:var(--petal);
-      opacity:.8;
-      animation: fall linear forwards;
-      z-index:1;
-    }
-
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) translateX(var(--drift));
-        opacity:0;
-      }
-    }
-
-    /* tiny celebration pops */
-    .pop{
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events:none;
-      font-size: 18px;
-      animation: floatUp .9s ease forwards;
-      text-shadow: 0 2px 0 rgba(0,0,0,.15);
-      z-index:3;
-    }
-
-    @keyframes floatUp{
-      0%{ opacity:0; transform: translate(-50%,-40%) scale(.9); }
-      10%{ opacity:1; }
-      100%{ opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); }
-    }
-  </style>
+/* pixel petals */
+.petal{
+  position:fixed;
+  width:18px;
+  height:18px;
+  background:var(--petal);
+  border-radius:4px 4px 12px 12px;
+  transform:rotate(45deg);
+  opacity:.8;
+  animation:fall linear forwards;
+  z-index:1;
+}
+@keyframes fall{
+  to{
+    transform:
+      translateY(110vh)
+      translateX(var(--drift))
+      rotate(225deg);
+    opacity:0;
+  }
+}
+</style>
 </head>
 
 <body>
-  <div class="pix" aria-hidden="true"></div>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="badge">Tiny Pixel Invite</div>
+<div class="bg" id="bg"></div>
 
-      <h1>Can I take you out?</h1>
-      <p class="sub">Hey Guddu 🌸</p>
+<main class="wrap">
+<section class="card">
+<div class="badge">Tiny Pixel Invite</div>
 
-      <div id="message" class="msg">
-        Nothing complicated. Just something nice, at your pace.
-      </div>
+<h1>Can I take you out?</h1>
+<p class="sub">Hey Guddu 🌸</p>
 
-      <div class="btnrow">
-        <button id="yes" type="button">YES</button>
-        <button id="no" type="button">NO</button>
-      </div>
+<div class="msg" id="message">
+Nothing complicated. Just something nice, at your pace.
+</div>
 
-      <div class="note" id="note">
-        (The NO button is a little shy.)
-      </div>
+<div class="btnrow">
+<button id="yes">YES</button>
+<button id="no">NO</button>
+</div>
 
-      <div class="footer">Made with quiet confidence.</div>
-    </section>
-  </main>
+<div class="note" id="note">
+(The NO button is a little shy, but try pressing anyways)
+</div>
+</section>
+</main>
 
-  <script>
-    const yes = document.getElementById("yes");
-    const no = document.getElementById("no");
-    const msg = document.getElementById("message");
-    const note = document.getElementById("note");
+<script>
+const yes = document.getElementById("yes");
+const no = document.getElementById("no");
+const msg = document.getElementById("message");
+const bg = document.getElementById("bg");
 
-    function buzz(ms = 20) {
-      if (navigator.vibrate) navigator.vibrate(ms);
-    }
+let yesScale = 1;
 
-    /* NO button shy movement */
-    no.addEventListener("mouseenter", () => {
-      no.style.transform =
-        `translate(${Math.random()*20 - 10}px, ${Math.random()*20 - 10}px)`;
-    });
-    no.addEventListener("mouseleave", () => {
-      no.style.transform = "translate(0,0)";
-    });
+function buzz(ms=20){
+  if(navigator.vibrate) navigator.vibrate(ms);
+}
 
-    /* falling petals */
-    function spawnPetal() {
-      const p = document.createElement("div");
-      p.className = "petal";
-      p.style.left = Math.random() * 100 + "vw";
-      p.style.animationDuration = (4 + Math.random()*3) + "s";
-      p.style.setProperty("--drift", (Math.random()*40 - 20) + "px");
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 7000);
-    }
-    setInterval(spawnPetal, 600);
+/* NO button dodge + YES growth */
+no.addEventListener("mouseenter",()=>{
+  no.style.transform =
+    `translate(${Math.random()*20-10}px,${Math.random()*20-10}px)`;
 
-    function pop() {
-      const el = document.createElement("div");
-      el.className = "pop";
-      el.textContent = Math.random() > 0.5 ? "🌸" : "🍪";
-      el.style.setProperty("--dx", (Math.random()*200 - 100) + "px");
-      el.style.setProperty("--dy", (-180 - Math.random()*80) + "px");
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 900);
-    }
+  yesScale = Math.min(yesScale + 0.12, 2.2);
+  yes.style.transform = `scale(${yesScale})`;
+});
 
-    yes.addEventListener("click", () => {
-      buzz(30);
-      yes.disabled = true;
-      no.disabled = true;
+no.addEventListener("mouseleave",()=>{
+  no.style.transform="translate(0,0)";
+});
 
-      msg.innerHTML = `
-        <b>Okay.</b><br><br>
-        We can decide together —
-        but I was thinking this weekend, something cozy.
-        <br><br>
-        <small>
-          I’ll bring cookies 🍪 and flowers 🌸<br>
-          Dress code: comfy, cute — Guddu rules apply.
-        </small>
-      `;
+/* petals */
+function spawnPetal(){
+  const p=document.createElement("div");
+  p.className="petal";
+  p.style.left=Math.random()*100+"vw";
+  p.style.animationDuration=(5+Math.random()*3)+"s";
+  p.style.setProperty("--drift",(Math.random()*60-30)+"px");
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),8000);
+}
+setInterval(spawnPetal,700);
 
-      note.textContent = "Looking forward to it.";
+/* background cookies + flowers */
+["🍪","🌸","✦"].forEach(icon=>{
+  for(let i=0;i<6;i++){
+    const s=document.createElement("span");
+    s.textContent=icon;
+    s.style.left=Math.random()*100+"vw";
+    s.style.animationDuration=(20+Math.random()*20)+"s";
+    bg.appendChild(s);
+  }
+});
 
-      for (let i = 0; i < 14; i++) setTimeout(pop, i * 60);
-    });
-  </script>
+yes.addEventListener("click",()=>{
+  buzz(30);
+  yes.disabled=true;
+  no.disabled=true;
+
+  msg.innerHTML=`
+<b>Okay.</b><br><br>
+We can decide together —
+but I was thinking this weekend, something cozy.
+<br><br>
+<small>
+I’ll bring cookies 🍪 and flowers 🌸<br>
+Dress code: red shalwara kameez and my glasses.
+</small>
+`;
+
+  document.getElementById("note").textContent="Looking forward to it.";
+});
+</script>
+
 </body>
 </html>
