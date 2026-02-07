@@ -39,8 +39,8 @@ body{
 }
 .bg span{
   position:absolute;
-  font-size:22px;
-  opacity:.25;
+  font-size:32px;
+  opacity:.5;
   animation: drift linear infinite;
 }
 @keyframes drift{
@@ -51,12 +51,18 @@ body{
 .wrap{ z-index:2; width:min(520px,92vw); padding:18px; }
 
 .card{
+  position: relative;
   background:var(--card);
   border:4px solid var(--ink);
   box-shadow:8px 8px 0 var(--shadow);
   border-radius:14px;
   padding:22px 18px;
   animation:float 4s ease-in-out infinite;
+  /* subtle dot pattern */
+  background-image: 
+    radial-gradient(circle, rgba(58,22,64,0.03) 1px, transparent 1px);
+  background-size: 12px 12px;
+  background-color: var(--card);
 }
 @keyframes float{
   0%,100%{ transform:translateY(0); }
@@ -96,6 +102,15 @@ h1{
   padding:12px;
   text-align:center;
   font-size:13px;
+  transition: all 0.4s ease;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-content{
+  transition: opacity 0.3s ease;
 }
 
 .btnrow{
@@ -112,38 +127,105 @@ button{
   border:3px solid var(--ink);
   box-shadow:4px 4px 0 var(--shadow);
   cursor:pointer;
-  transition:transform .15s ease;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  font-size: 11px;
 }
-#yes{ background:#7CFFB2; }
-#no{ background:#ffd4d4; }
+
+button:active{
+  transform: translateY(2px);
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+#yes{ 
+  background:#7CFFB2;
+  transform-origin: center;
+}
+
+#yes:hover{
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 var(--shadow);
+}
+
+#no{ 
+  background:#ffd4d4;
+  transition: transform .1s ease, opacity .15s ease, font-size .15s ease;
+}
+
+#no:disabled,
+#yes:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .note{
   text-align:center;
   font-size:12px;
   opacity:.7;
   margin-top:10px;
+  transition: opacity 0.3s ease;
 }
 
-/* pixel petals */
-.petal{
+/* pixel hearts instead of petals */
+.heart{
   position:fixed;
-  width:18px;
-  height:18px;
-  background:var(--petal);
-  border-radius:4px 4px 12px 12px;
-  transform:rotate(45deg);
-  opacity:.8;
+  width:24px;
+  height:24px;
+  opacity:.9;
   animation:fall linear forwards;
   z-index:1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffb7d5' d='M0 4h4v4H0zM12 4h4v4h-4zM4 0h4v4H4zM8 0h4v4H8zM4 8h8v4H4zM4 12h8v4H4z'/%3E%3C/svg%3E");
+  background-size: contain;
 }
+
 @keyframes fall{
   to{
     transform:
       translateY(110vh)
       translateX(var(--drift))
-      rotate(225deg);
+      rotate(var(--rotation));
     opacity:0;
   }
+}
+
+/* confetti */
+.confetti{
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  z-index: 100;
+  animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall{
+  0%{
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100%{
+    transform: 
+      translateY(100vh) 
+      translateX(var(--confetti-x))
+      rotate(var(--confetti-rotation));
+    opacity: 0;
+  }
+}
+
+/* pop animation for card */
+@keyframes popCard{
+  0%{ transform: scale(1); }
+  50%{ transform: scale(1.05); }
+  100%{ transform: scale(1); }
+}
+
+.card.celebrating{
+  animation: popCard 0.5s ease;
+}
+
+/* YES button grow animation */
+@keyframes yesGrow{
+  0%{ transform: scale(var(--prev-scale)); }
+  50%{ transform: scale(calc(var(--prev-scale) + 0.15)); }
+  100%{ transform: scale(var(--current-scale)); }
 }
 </style>
 </head>
@@ -153,14 +235,16 @@ button{
 <div class="bg" id="bg"></div>
 
 <main class="wrap">
-<section class="card">
+<section class="card" id="card">
 <div class="badge">Tiny Pixel Invite</div>
 
 <h1>Can I take you out?</h1>
 <p class="sub">Hey Guddu 🌸</p>
 
 <div class="msg" id="message">
+<div class="msg-content" id="msgContent">
 Nothing complicated. Just something nice, at your pace.
+</div>
 </div>
 
 <div class="btnrow">
@@ -178,67 +262,141 @@ Nothing complicated. Just something nice, at your pace.
 const yes = document.getElementById("yes");
 const no = document.getElementById("no");
 const msg = document.getElementById("message");
+const msgContent = document.getElementById("msgContent");
 const bg = document.getElementById("bg");
+const card = document.getElementById("card");
+const note = document.getElementById("note");
 
 let yesScale = 1;
+let noClickCount = 0;
+let noDodgeSpeed = 20;
 
 function buzz(ms=20){
   if(navigator.vibrate) navigator.vibrate(ms);
 }
 
-/* NO button dodge + YES growth */
-no.addEventListener("mouseenter",()=>{
-  no.style.transform =
-    `translate(${Math.random()*20-10}px,${Math.random()*20-10}px)`;
-
-  yesScale = Math.min(yesScale + 0.12, 2.2);
-  yes.style.transform = `scale(${yesScale})`;
+/* NO button click - makes YES bigger and NO smaller/faster */
+no.addEventListener("click", (e) => {
+  e.preventDefault();
+  buzz(15);
+  
+  noClickCount++;
+  
+  // Store previous scale for animation
+  const prevScale = yesScale;
+  
+  // Increase YES size more dramatically
+  yesScale = Math.min(yesScale + 0.18, 2.5);
+  
+  // Animate YES button growth
+  yes.style.setProperty('--prev-scale', prevScale);
+  yes.style.setProperty('--current-scale', yesScale);
+  yes.style.animation = 'none';
+  setTimeout(() => {
+    yes.style.animation = 'yesGrow 0.3s ease-out forwards';
+    yes.style.transform = `scale(${yesScale})`;
+  }, 10);
+  
+  // Make NO button progressively smaller and faster
+  const noScale = Math.max(1 - (noClickCount * 0.08), 0.6);
+  no.style.fontSize = `${11 * noScale}px`;
+  noDodgeSpeed = Math.min(20 + (noClickCount * 15), 80);
 });
 
-no.addEventListener("mouseleave",()=>{
-  no.style.transform="translate(0,0)";
+/* NO button dodge */
+no.addEventListener("mouseenter", () => {
+  const randomX = (Math.random() * noDodgeSpeed * 2) - noDodgeSpeed;
+  const randomY = (Math.random() * noDodgeSpeed * 2) - noDodgeSpeed;
+  
+  no.style.transform = `translate(${randomX}px, ${randomY}px)`;
+  buzz(10);
 });
 
-/* petals */
-function spawnPetal(){
-  const p=document.createElement("div");
-  p.className="petal";
-  p.style.left=Math.random()*100+"vw";
-  p.style.animationDuration=(5+Math.random()*3)+"s";
-  p.style.setProperty("--drift",(Math.random()*60-30)+"px");
-  document.body.appendChild(p);
-  setTimeout(()=>p.remove(),8000);
+no.addEventListener("mouseleave", () => {
+  no.style.transform = "translate(0,0)";
+});
+
+/* pixel hearts */
+function spawnHeart(){
+  const h = document.createElement("div");
+  h.className = "heart";
+  h.style.left = Math.random() * 100 + "vw";
+  h.style.animationDuration = (5 + Math.random() * 3) + "s";
+  h.style.setProperty("--drift", (Math.random() * 60 - 30) + "px");
+  h.style.setProperty("--rotation", (Math.random() * 360) + "deg");
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 8000);
 }
-setInterval(spawnPetal,700);
+setInterval(spawnHeart, 400); // spawn more frequently
 
-/* background cookies + flowers */
-["🍪","🌸","✦"].forEach(icon=>{
-  for(let i=0;i<6;i++){
-    const s=document.createElement("span");
-    s.textContent=icon;
-    s.style.left=Math.random()*100+"vw";
-    s.style.animationDuration=(20+Math.random()*20)+"s";
+/* confetti explosion */
+function createConfetti(x, y){
+  const colors = ['#7CFFB2', '#ffb7d5', '#ff78b5', '#ffd4d4', '#FFD93D', '#A8E6CF'];
+  
+  for(let i = 0; i < 50; i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = x + "px";
+    c.style.top = y + "px";
+    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    c.style.setProperty("--confetti-x", (Math.random() * 400 - 200) + "px");
+    c.style.setProperty("--confetti-rotation", (Math.random() * 720 - 360) + "deg");
+    c.style.animationDelay = Math.random() * 0.1 + "s";
+    document.body.appendChild(c);
+    
+    setTimeout(() => c.remove(), 3000);
+  }
+}
+
+/* background cookies, flowers, cats, sparkles */
+["🍪","🌸","🐈‍⬛","✨","🌺","🧁"].forEach(icon => {
+  const count = icon === "🐈‍⬛" ? 6 : 8; // more of everything
+  for(let i = 0; i < count; i++){
+    const s = document.createElement("span");
+    s.textContent = icon;
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.animationDuration = (20 + Math.random() * 20) + "s";
+    s.style.animationDelay = Math.random() * -20 + "s"; // stagger start times
     bg.appendChild(s);
   }
 });
 
-yes.addEventListener("click",()=>{
+/* YES button click */
+yes.addEventListener("click", (e) => {
   buzz(30);
-  yes.disabled=true;
-  no.disabled=true;
-
-  msg.innerHTML=`
+  yes.disabled = true;
+  no.disabled = true;
+  
+  // Pop animation
+  card.classList.add('celebrating');
+  
+  // Confetti from button position
+  const rect = yes.getBoundingClientRect();
+  createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  
+  // Fade out old message
+  msgContent.style.opacity = '0';
+  
+  setTimeout(() => {
+    msgContent.innerHTML = `
 <b>Okay.</b><br><br>
-We can decide together —
-but I was thinking this weekend, something cozy.
+We can decide together — but I was thinking this weekend, something cozy, something for just us.
 <br><br>
 <small>
-I’ll bring cookies 🍪 and flowers 🌸<br>
-Dress code: red shalwara kameez and my glasses.
+I'll bring cookies 🍪 and flowers 🌸<br>
+Now I just need a time, date and what you want to do and eat<br>
+Dress code (for you): Red Shalwar Kameez and my glasses.
 </small>
-`;
-
-  document.getElementById("note").textContent="Looking forward to it.";
+    `;
+    // Fade in new message
+    msgContent.style.opacity = '1';
+  }, 300);
+  
+  note.style.opacity = '0';
+  setTimeout(() => {
+    note.textContent = "Made with love 💖";
+    note.style.opacity = '1';
+  }, 400);
 });
 </script>
 
