@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Date Invite</title>
+
+  <!-- Pixel-ish font (optional). If it fails, it falls back gracefully. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --pink1:#ffd1e8;
+      --pink2:#ff78b5;
+      --pink3:#ff4aa2;
+      --ink:#3a1640;
+      --card:#fff6fb;
+      --shadow:#b83b78;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      margin:0;
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 20% 15%, #fff 0 10%, transparent 11%),
+        radial-gradient(circle at 80% 25%, #fff 0 9%, transparent 10%),
+        radial-gradient(circle at 35% 80%, #fff 0 8%, transparent 9%),
+        linear-gradient(135deg, var(--pink1), #ffe6f3 45%, var(--pink2));
+      color: var(--ink);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow:hidden;
+    }
+
+    /* little floating pixels */
+    .pix{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.35;
+      background-image:
+        linear-gradient(transparent 95%, rgba(58,22,64,.25) 95%),
+        linear-gradient(90deg, transparent 95%, rgba(58,22,64,.25) 95%);
+      background-size: 18px 18px;
+      mix-blend-mode: multiply;
+    }
+
+    .wrap{
+      width:min(520px, 92vw);
+      padding:18px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 4px solid var(--ink);
+      box-shadow: 8px 8px 0 var(--shadow);
+      border-radius: 14px;
+      padding: 22px 18px 18px;
+      position:relative;
+    }
+
+    .badge{
+      position:absolute;
+      top:-14px;
+      left:14px;
+      background: var(--pink3);
+      color: #fff;
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--shadow);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-family: "Press Start 2P", system-ui;
+      font-size: 10px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+
+    h1{
+      margin: 10px 0 10px;
+      font-family: "Press Start 2P", system-ui;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align:center;
+    }
+
+    .sub{
+      text-align:center;
+      margin: 0 0 14px;
+      font-size: 14px;
+      opacity:.9;
+    }
+
+    .heartline{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      margin: 10px 0 14px;
+      font-size: 18px;
+    }
+
+    .msg{
+      margin: 10px auto 14px;
+      padding: 12px 12px;
+      border: 3px dashed rgba(58,22,64,.6);
+      border-radius: 12px;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1.45;
+      text-align:center;
+    }
+
+    .note{
+      margin-top: 10px;
+      font-size: 12px;
+      opacity:.75;
+      text-align:center;
+    }
+
+    .btnrow{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap: 14px;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+
+    button{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-family: "Press Start 2P", system-ui;
+      font-size: 12px;
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--shadow);
+      transition: transform .08s ease, box-shadow .08s ease;
+      user-select:none;
+    }
+    button:active{
+      transform: translate(2px,2px);
+      box-shadow: 2px 2px 0 var(--shadow);
+    }
+
+    #yes{
+      background: #7CFFB2;
+    }
+    #no{
+      background: #ffd4d4;
+    }
+
+    .footer{
+      margin-top: 14px;
+      text-align:center;
+      font-size: 11px;
+      opacity:.65;
+    }
+
+    /* tiny confetti hearts */
+    .pop{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events:none;
+      font-size: 18px;
+      animation: floatUp .9s ease forwards;
+      text-shadow: 0 2px 0 rgba(0,0,0,.15);
+    }
+    @keyframes floatUp{
+      0%{ opacity:0; transform: translate(-50%,-40%) scale(.9); }
+      10%{ opacity:1; }
+      100%{ opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pix" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="badge">Tiny Pixel Invite</div>
+
+      <h1>Will you go on a date with me?</h1>
+      <p class="sub">I’m sorry for being annoying. I want to make it up to you.</p>
+
+      <div class="heartline" aria-hidden="true">♡ ✦ ♡ ✦ ♡</div>
+
+      <div id="message" class="msg">
+        Pick <b>YES</b> and I’ll plan something sweet (your vibe, your pace).
+      </div>
+
+      <div class="btnrow">
+        <button id="yes" type="button">YES</button>
+        <button id="no" type="button">NO</button>
+      </div>
+
+      <div class="note" id="note">
+        (No worries — the “NO” button is just… cosmetically challenged.)
+      </div>
+
+      <div class="footer">Made with embarrassing sincerity.</div>
+    </section>
+  </main>
+
+  <script>
+    const yes = document.getElementById("yes");
+    const no = document.getElementById("no");
+    const msg = document.getElementById("message");
+    const note = document.getElementById("note");
+
+    let noCount = 0;
+    let yesScale = 1;
+
+    const noLines = [
+      "Okay but… are you *sure* sure?",
+      "That NO seems suspicious. Try again.",
+      "I will accept this answer only after 37 more reviews.",
+      "Plot twist: the YES button is the correct answer key.",
+      "My programming says: choose YES for maximum happiness.",
+      "I brought the pixels. You bring the smile.",
+      "Fine. But I’m making YES bigger. For science."
+    ];
+
+    const yesLines = [
+      "YES?! Okay. I’m officially relieved.",
+      "Deal. I’ll handle the plan. You just show up pretty.",
+      "You just made my entire week.",
+      "Locked in. Date protocol initiated."
+    ];
+
+    function popHeart() {
+      const el = document.createElement("div");
+      el.className = "pop";
+      el.textContent = Math.random() > 0.5 ? "♡" : "✦";
+      el.style.setProperty("--dx", (Math.random()*240 - 120) + "px");
+      el.style.setProperty("--dy", (-220 - Math.random()*120) + "px");
+      el.style.left = (50 + (Math.random()*20 - 10)) + "%";
+      el.style.top  = (55 + (Math.random()*10 - 5)) + "%";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }
+
+    no.addEventListener("click", () => {
+      noCount++;
+      yesScale = Math.min(yesScale + 0.18, 3.2);
+
+      yes.style.transform = `scale(${yesScale})`;
+      msg.innerHTML = noLines[noCount % noLines.length];
+
+      // make "no" a little shy
+      no.style.transform = `scale(${Math.max(1 - noCount*0.03, 0.75)})`;
+
+      popHeart();
+    });
+
+    yes.addEventListener("click", () => {
+      // lock state
+      yes.disabled = true;
+      no.disabled = true;
+
+      msg.innerHTML = `<b>YAY.</b> Send me: <br><br>
+        1) one day you’re free <br>
+        2) one food you’re craving <br>
+        3) one thing you’d enjoy doing`;
+      note.textContent = yesLines[Math.floor(Math.random()*yesLines.length)];
+
+      // a small celebration burst
+      for (let i = 0; i < 18; i++) setTimeout(popHeart, i * 40);
+
+      // gentle visual emphasis
+      yes.style.transform = "scale(1.15)";
+      no.style.opacity = "0.5";
+    });
+  </script>
+</body>
+</html>
